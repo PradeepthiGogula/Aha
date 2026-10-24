@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aha demo – Telugu movies, series and originals</title>
+<style>
+:root{--bg:#0d0f1a;--panel:#171a2b;--orange:#ff6a1a;--gold:#ffb300;--text:#f4f4f8;--muted:#9a9db3}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;overflow-x:hidden}
+button{font:inherit;cursor:pointer;border:0}
+
+/* NAV */
+nav{position:fixed;top:0;width:100%;z-index:20;display:flex;align-items:center;gap:26px;padding:12px 4%;transition:background .3s;background:linear-gradient(#000b,transparent)}
+nav.solid{background:var(--bg)}
+.logo{font-size:2rem;font-weight:900;color:var(--orange);text-decoration:none;letter-spacing:-1.5px}
+nav ul{display:flex;gap:20px;list-style:none}
+nav li a{color:var(--text);text-decoration:none;font-size:.92rem;opacity:.8;padding-bottom:4px;border-bottom:2px solid transparent}
+nav li a:hover,nav li a.on{opacity:1;border-color:var(--orange)}
+.right{margin-left:auto;display:flex;gap:12px;align-items:center}
+.right input{background:#0008;border:1px solid #fff4;color:#fff;padding:7px 12px;border-radius:20px;width:180px}
+.right input:focus{outline:2px solid var(--orange)}
+.sub{background:linear-gradient(90deg,var(--orange),var(--gold));color:#111;font-weight:800;padding:8px 18px;border-radius:20px}
+
+/* HERO CAROUSEL */
+.hero{position:relative;height:86vh;min-height:470px;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;align-items:center;padding:0 4%;opacity:0;transition:opacity .8s}
+.slide.on{opacity:1}
+.slide::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#0d0f1aee 15%,transparent 70%),linear-gradient(0deg,var(--bg),transparent 35%)}
+.info{position:relative;z-index:2;max-width:560px}
+.tag{display:inline-block;background:var(--orange);color:#111;font-weight:800;font-size:.75rem;padding:3px 10px;border-radius:3px;margin-bottom:14px}
+.info h1{font-size:clamp(2.2rem,6vw,4.2rem);line-height:1.05;margin-bottom:12px}
+.info .m{color:var(--gold);font-weight:600;margin-bottom:10px}
+.info p{color:#d6d8e6;line-height:1.55;margin-bottom:22px}
+.btn{padding:11px 26px;border-radius:30px;font-weight:700;margin-right:10px}
+.btn.p{background:var(--orange);color:#111}.btn.p:hover{background:var(--gold)}
+.btn.s{background:#ffffff22;color:#fff}.btn.s:hover{background:#ffffff44}
+.dots{position:absolute;bottom:60px;right:4%;display:flex;gap:8px;z-index:3}
+.dots button{width:10px;height:10px;border-radius:50%;background:#fff5}
+.dots button.on{background:var(--orange);width:26px;border-radius:6px}
+
+/* CHIPS + ROWS */
+.chips{display:flex;gap:10px;padding:0 4%;margin-top:-40px;position:relative;z-index:3;flex-wrap:wrap}
+.chip{background:var(--panel);color:var(--text);padding:8px 18px;border-radius:20px;font-size:.9rem}
+.chip.on{background:var(--orange);color:#111;font-weight:700}
+main{padding:24px 0 50px}
+.row{padding-left:4%;margin-bottom:28px}
+.row h2{font-size:1.2rem;margin-bottom:10px}
+.wrap{position:relative}
+.track{display:flex;gap:10px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;padding:10px 0}
+.track::-webkit-scrollbar{display:none}
+.arrow{position:absolute;top:10px;bottom:10px;width:4%;min-width:32px;background:#000a;color:#fff;font-size:2rem;z-index:3;opacity:0;transition:opacity .2s}
+.wrap:hover .arrow{opacity:1}.arrow.l{left:-4%}.arrow.r{right:0}
+.card{flex:0 0 auto;width:150px;height:225px;border-radius:8px;position:relative;overflow:hidden;cursor:pointer;
+display:flex;align-items:flex-end;padding:10px;font-weight:700;line-height:1.2;text-shadow:0 1px 6px #000;transition:transform .25s}
+.card:hover{transform:scale(1.08);box-shadow:0 8px 26px #000;z-index:4}
+.card .b{position:absolute;top:8px;left:8px;background:var(--orange);color:#111;font-size:.65rem;padding:2px 6px;border-radius:3px;text-shadow:none}
+.card .pr{position:absolute;left:0;bottom:0;height:4px;background:var(--orange)}
+.card.land{width:240px;height:135px}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:#000c;z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
+.modal.open{display:flex}
+.box{background:var(--panel);width:min(700px,100%);max-height:92vh;overflow:auto;border-radius:12px}
+.art{height:280px;position:relative;display:flex;align-items:flex-end;padding:22px}
+.art h3{font-size:2rem;text-shadow:0 2px 10px #000}
+.close{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:#000a;color:#fff}
+.body{padding:20px 24px 26px}
+.body .m{color:var(--gold);font-weight:600;margin-bottom:10px}
+.body p{color:#d6d8e6;line-height:1.6;margin-bottom:18px}
+
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:28px 4%}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--orange);color:#111;padding:10px 20px;border-radius:24px;font-weight:700;transition:transform .3s;z-index:60}
+.toast.show{transform:translateX(-50%)}
+@media(max-width:760px){nav ul{display:none}.right input{width:120px}.sub{padding:8px 12px}.card{width:120px;height:180px;font-size:.85rem}.card.land{width:190px;height:107px}.arrow{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a class="logo" href="#">aha</a>
+  <ul>
+    <li><a href="#" class="on" data-f="all">Home</a></li>
+    <li><a href="#" data-f="Movie">Movies</a></li>
+    <li><a href="#" data-f="Series">Web Series</a></li>
+    <li><a href="#" data-f="Original">Originals</a></li>
+    <li><a href="#" data-f="list">My List</a></li>
+  </ul>
+  <div class="right">
+    <input id="q" type="search" placeholder="Search titles" aria-label="Search titles">
+    <button class="sub" id="subBtn">Subscribe</button>
+  </div>
+</nav>
+
+<header class="hero" id="hero"></header>
+<div class="chips" id="chips"></div>
+<main id="rows"></main>
+<footer>Demo site with placeholder titles · Hosted on Amazon S3 &amp; CloudFront</footer>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="box">
+    <div class="art" id="mArt"><button class="close" id="mClose" aria-label="Close">✕</button><h3 id="mTitle"></h3></div>
+    <div class="body">
+      <div class="m" id="mMeta"></div>
+      <p id="mDesc"></p>
+      <button class="btn p" id="mPlay">▶ Watch now</button>
+      <button class="btn s" id="mList"></button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- DATA: all titles are fictional placeholders. Replace with your own. ---------- */
+const G=[["#ff6a1a","#6a0572"],["#1d2671","#c33764"],["#134e5e","#71b280"],["#8e2de2","#4a00e0"],["#f7971e","#b21f1f"],
+["#0f2027","#2c5364"],["#cb2d3e","#ef473a"],["#005c97","#363795"],["#3a1c71","#ffaf7b"],["#134e5e","#e9d758"]];
+const T=(title,type,lang,year,genre,cat,desc,orig=false,prog=0)=>({title,type,lang,year,genre,cat,desc,orig,prog});
+const titles=[
+T("Godavari Nights","Series","Telugu",2025,"Thriller","Aha Originals","A river-town journalist digs into a case the police want buried.",true),
+T("Charminar Chronicles","Series","Telugu",2024,"Drama","Aha Originals","Three generations of a Hyderabad family fight over an old pearl shop.",true),
+T("Kondapalli Kings","Series","Telugu",2025,"Comedy","Aha Originals","Toy makers turn a small business into a big-city brand.",true),
+T("Rayalaseema Run","Series","Telugu",2023,"Action","Aha Originals","A cop and a smuggler share one night, one bike and one secret.",true),
+T("Midnight Biryani","Series","Telugu",2024,"Comedy","Aha Originals","A late-night food truck becomes the center of every city secret.",true),
+T("Vizag Vibes","Movie","Telugu",2025,"Romance","New Releases","Two strangers keep missing each other along the Vizag beach road."),
+T("The Tank Bund Case","Movie","Telugu",2025,"Crime","New Releases","A forensic artist recognizes the face of a missing person in a mural."),
+T("Sankranti Surprise","Movie","Telugu",2024,"Family","New Releases","A festival week reunites a family that stopped speaking."),
+T("Nallamala","Movie","Telugu",2025,"Adventure","New Releases","Forest rangers track a signal deep into the hills."),
+T("Hi-Tech City","Movie","Telugu",2024,"Drama","New Releases","An intern uncovers the real reason his startup is growing."),
+T("Madras Mail","Movie","Tamil",2024,"Thriller","Tamil Picks","A train ticket checker spots a passenger who never gets off."),
+T("Chennai Chai Co.","Series","Tamil",2025,"Comedy","Tamil Picks","Two cousins fight over the family tea stall recipe."),
+T("Kaveri Tales","Movie","Tamil",2023,"Drama","Tamil Picks","A ferryman carries a different story across the river every day."),
+T("Marina Midnight","Movie","Tamil",2024,"Crime","Tamil Picks","A late-night walker witnesses something he can't report."),
+T("Kerala Backwaters","Series","Malayalam",2025,"Mystery","Malayalam Picks","A houseboat guest list holds one name that shouldn't be there."),
+T("Monsoon Mangoes","Movie","Malayalam",2024,"Family","Malayalam Picks","An old mango tree decides whether a family stays or sells."),
+T("Kochi Code","Series","Malayalam",2023,"Thriller","Malayalam Picks","A hacker leaves clues in a harbor city's street art."),
+T("Spice Route","Movie","Malayalam",2025,"Adventure","Malayalam Picks","A spice trader's grandson follows a map hidden in a recipe."),
+T("Laugh Out Lane","Series","Telugu",2023,"Comedy","Binge-worthy Comedy","Neighbors in one lane compete in everything, even festivals."),
+T("Auto Anna","Movie","Telugu",2024,"Comedy","Binge-worthy Comedy","An auto driver becomes the unofficial mayor of one street."),
+T("WiFi Wedding","Movie","Telugu",2025,"Comedy","Binge-worthy Comedy","A village wedding has to go online when the groom's visa gets stuck."),
+T("Office Chai Break","Series","Telugu",2022,"Comedy","Binge-worthy Comedy","The real office decisions happen at the tea stall downstairs.")
+].map((t,i)=>({...t,id:i,g:G[i%G.length]}));
+titles[2].prog=60;titles[6].prog=35;titles[10].prog=80;
+
+/* ---------- STATE ---------- */
+const $=s=>document.querySelector(s);
+const langs=["All","Telugu","Tamil","Malayalam"];
+let myList=[],filter="all",lang="All",query="",cur=null;
+try{myList=JSON.parse(localStorage.getItem("ahaList")||"[]")}catch(e){}
+const bg=t=>`linear-gradient(150deg,${t.g[0]},${t.g[1]})`;
+
+/* ---------- HERO CAROUSEL ---------- */
+const heroes=titles.filter(t=>t.orig).slice(0,4);let hi=0,timer;
+$("#hero").innerHTML=heroes.map((t,i)=>`<div class="slide${i?"":" on"}" style="background:${bg(t)}">
+<div class="info"><span class="tag">AHA ORIGINAL</span><h1>${t.title}</h1>
+<div class="m">${t.year} · ${t.genre} · ${t.lang}</div><p>${t.desc}</p>
+<button class="btn p" data-play="${t.id}">▶ Watch now</button><button class="btn s" data-info="${t.id}">ⓘ Details</button></div></div>`).join("")+
+`<div class="dots">${heroes.map((_,i)=>`<button aria-label="Slide ${i+1}" class="${i?"":"on"}"></button>`).join("")}</div>`;
+function go(n){
+  hi=n;document.querySelectorAll(".slide").forEach((s,i)=>s.classList.toggle("on",i===n));
+  document.querySelectorAll(".dots button").forEach((d,i)=>d.classList.toggle("on",i===n));
+  clearInterval(timer);timer=setInterval(()=>go((hi+1)%heroes.length),6000);
+}
+document.querySelectorAll(".dots button").forEach((d,i)=>d.onclick=()=>go(i));
+document.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>toast("Playing “"+titles[b.dataset.play].title+"”"));
+document.querySelectorAll("[data-info]").forEach(b=>b.onclick=()=>openModal(+b.dataset.info));
+go(0);
+
+/* ---------- LANGUAGE CHIPS ---------- */
+function chips(){
+  $("#chips").innerHTML=langs.map(l=>`<button class="chip${l===lang?" on":""}">${l}</button>`).join("");
+  document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{lang=c.textContent;chips();render()});
+}
+
+/* ---------- ROWS ---------- */
+function list(){
+  return titles.filter(t=>{
+    if(lang!=="All"&&t.lang!==lang)return false;
+    if(query&&!(t.title+t.genre+t.lang).toLowerCase().includes(query))return false;
+    if(filter==="list")return myList.includes(t.id);
+    if(filter==="Original")return t.orig;
+    if(filter==="Movie"||filter==="Series")return t.type===filter;
+    return true;
+  });
+}
+function row(name,items,land){
+  return `<section class="row"><h2>${name}</h2><div class="wrap"><button class="arrow l" aria-label="Scroll left">‹</button>
+  <div class="track">${items.map(t=>`<div class="card${land?" land":""}" data-id="${t.id}" tabindex="0" style="background:${bg(t)}">
+  ${t.orig?'<span class="b">ORIGINAL</span>':""}${t.title}${t.prog&&land?`<span class="pr" style="width:${t.prog}%"></span>`:""}</div>`).join("")}</div>
+  <button class="arrow r" aria-label="Scroll right">›</button></div></section>`;
+}
+function render(){
+  const l=list(),rows=$("#rows");
+  if(!l.length){rows.innerHTML='<section class="row"><h2>No titles found. Try another search, language or add titles to My List.</h2></section>';return}
+  let html="";
+  if(filter==="all"&&!query){
+    const cw=l.filter(t=>t.prog);if(cw.length)html+=row("Continue watching",cw,true);
+    html+=[...new Set(l.map(t=>t.cat))].map(c=>row(c,l.filter(t=>t.cat===c))).join("");
+  }else html=row(filter==="list"?"My List":query?"Search results":"All titles",l);
+  rows.innerHTML=html;
+  rows.querySelectorAll(".card").forEach(c=>{c.onclick=()=>openModal(+c.dataset.id);c.onkeydown=e=>{if(e.key==="Enter")c.click()}});
+  rows.querySelectorAll(".arrow").forEach(a=>a.onclick=()=>{
+    const tr=a.parentElement.querySelector(".track");
+    tr.scrollBy({left:(a.classList.contains("r")?1:-1)*tr.clientWidth*.8});
+  });
+}
+
+/* ---------- MODAL ---------- */
+function openModal(id){
+  cur=titles[id];
+  $("#mArt").style.background=bg(cur);
+  $("#mTitle").textContent=cur.title;
+  $("#mMeta").textContent=`${cur.year} · ${cur.genre} · ${cur.type} · ${cur.lang}`;
+  $("#mDesc").textContent=cur.desc;
+  lbl();$("#modal").classList.add("open");
+}
+const lbl=()=>$("#mList").textContent=myList.includes(cur.id)?"✓ In My List":"＋ My List";
+const close=()=>$("#modal").classList.remove("open");
+$("#mClose").onclick=close;
+$("#modal").onclick=e=>{if(e.target.id==="modal")close()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
+$("#mPlay").onclick=()=>toast("Playing “"+cur.title+"”");
+$("#mList").onclick=()=>{
+  const i=myList.indexOf(cur.id);i>-1?myList.splice(i,1):myList.push(cur.id);
+  try{localStorage.setItem("ahaList",JSON.stringify(myList))}catch(e){}
+  lbl();toast(i>-1?"Removed from My List":"Added to My List");if(filter==="list")render();
+};
+
+/* ---------- NAV / SEARCH / TOAST ---------- */
+addEventListener("scroll",()=>$("#nav").classList.toggle("solid",scrollY>40));
+document.querySelectorAll("[data-f]").forEach(a=>a.onclick=e=>{
+  e.preventDefault();filter=a.dataset.f;query="";$("#q").value="";
+  document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x===a));render();
+});
+$("#q").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();render()});
+$("#subBtn").onclick=()=>toast("Subscription plans coming soon");
+let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),2000)}
+chips();render();
+</script>
+</body>
+</html>
